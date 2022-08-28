@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: task
+  name: task
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: task
+  template:
+    metadata:
+      labels:
+        app: task
+    spec:
+      serviceAccount: sa
+      containers:
+      - image: httpd
+        name: httpd
+        securityContext:
+          runAsNonRoot: true
+        ports:
+          - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+        env:
+          - name: API_KEY
+            valueFrom:
+                secretKeyRef:
+                  name: api-key-secret
+                  key: api_key
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-httpd
+spec:
+  selector:
+    app: task
+  ports:
+  - protocol: "TCP"
+    port: 8000
+    targetPort: 80
+    nodePort: 31000
+  type: NodePort
