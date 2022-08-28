@@ -1,0 +1,44 @@
+name: Scan the Kubernetes deployment with Alcide
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  advisor-test:    
+    runs-on: ubuntu-latest   
+    steps:    
+      - name: Checkout    
+        uses: actions/checkout@v1
+
+      - name: Start minikube
+        uses: medyagh/setup-minikube@master
+        
+      - name: Test the cluster
+        run: kubectl get pods -A
+        
+      - name: Deploy to minikube
+        run:
+          kubectl apply -f deployment.yaml,hpa.yaml,pdb.yaml,api-key-secret.yaml,service-account.yaml,role.yaml,rb.yaml
+          
+      - name: Test
+        run: |
+          kubectl cluster-info
+          kubectl get deploy
+          
+      - name: Scan Local Cluster
+        uses: alcideio/advisor-action@v1.1.0   
+        with:
+          exclude_namespaces: '-'
+          include_namespaces: '*'
+          output_file: 'advisor-scan.html'
+
+      - name: Upload Alcide Advisor Scan Report
+        uses: actions/upload-artifact@v1
+        with:
+          name: advisor-scan.html 
+          path: advisor-scan.html  
