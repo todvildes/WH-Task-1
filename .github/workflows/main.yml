@@ -35,6 +35,7 @@ jobs:
         with:
           exclude_namespaces: '-'
           include_namespaces: '*'
+          fail_on_critical: true
           output_file: 'advisor-scan.html'
 
       - name: Upload Alcide Advisor Scan Report
