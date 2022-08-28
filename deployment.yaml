@@ -22,8 +22,10 @@ spec:
       containers:
       - image: httpd
         name: httpd
+        command: [ "sh", "-c", "sleep 1h" ]
         securityContext:
-          runAsNonRoot: true
+          runAsUser: 2000
+          runAsGroup: 3000
         ports:
           - containerPort: 80
         resources:
